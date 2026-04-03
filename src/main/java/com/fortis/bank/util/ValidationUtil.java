@@ -1,5 +1,6 @@
 package com.fortis.bank.util;
 
+import java.math.BigDecimal;
 import java.util.regex.Pattern;
 
 /**
@@ -49,5 +50,12 @@ public final class ValidationUtil {
             throw new IllegalArgumentException("pin must be exactly 4 digits");
         }
         return cleaned;
+    }
+
+    public static BigDecimal validateAmount(BigDecimal amount) {
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("amount must be greater than zero");
+        }
+        return amount;
     }
 }
