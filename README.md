@@ -1,7 +1,7 @@
 # Fortis Bank System - Console Application
 
 Developer: Franck Merlin  
-Version: v0.0.1  
+Version: v0.3.0  
 
 ## Project Scope
 This repository contains a solo implementation for the Fortis Bank case study.
@@ -15,6 +15,31 @@ The goal is to deliver a functional Java console MVP with layered architecture.
 - Business layer: banking entities and service orchestration
 - Data layer: file persistence and repository contracts
 - Presentation layer: console menus and workflows
+
+## Implemented MVP Features
+- Customer onboarding with mandatory checking account creation.
+- Multi-account request/approval flow for savings, credit, currency, and line of credit accounts.
+- Deposit, withdraw, and same-customer transfer operations.
+- Transaction history tracking by account.
+- Checking transaction quota with automatic fee application after free monthly operations.
+- Manager operations for customer listing, approval handling, closure, and report generation.
+- Notification/audit event capture and monthly statement export.
+- File-based snapshot persistence in `data/`.
+
+## Run and Build
+- Compile (Maven): `mvn -DskipTests compile`
+- Run app: `mvn -DskipTests exec:java -Dexec.mainClass=com.fortis.bank.FortisBank`
+- Fallback compile (without Maven, PowerShell): `javac -d out (Get-ChildItem -Recurse src/main/java -Filter *.java | ForEach-Object { $_.FullName })`
+
+## Data Output
+- Runtime snapshot files are written under `data/`:
+- `customers.csv`
+- `accounts.csv`
+- `transactions.csv`
+- `pending_requests.csv`
+- `notifications.log`
+- `audit.log`
+- Monthly statements are generated under `data/statements/`.
 
 ## Documentation Map
 - [Analysis](docs/analysis/README.md)
