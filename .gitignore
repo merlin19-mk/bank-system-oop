@@ -26,4 +26,4 @@ replay_pid*
 # Build and runtime outputs
 target/
 out/
-data/
+/data/

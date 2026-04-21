@@ -1,6 +1,10 @@
 package com.fortis.bank.business.customer;
 
+import com.fortis.bank.data.database.CustomerDbRepository;
+import com.fortis.bank.data.database.InMemoryDatabaseGateway;
 import com.fortis.bank.util.ValidationUtil;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Core customer entity used by the business layer.
@@ -9,6 +13,9 @@ import com.fortis.bank.util.ValidationUtil;
  * @version v0.0.2
  */
 public class Customer {
+
+    private static final CustomerDbRepository DB_REPOSITORY =
+            new CustomerDbRepository(new InMemoryDatabaseGateway<>());
 
     private final String customerNumber;
     private String firstName;
@@ -75,5 +82,25 @@ public class Customer {
 
     public void close() {
         this.status = CustomerStatus.CLOSED;
+    }
+
+    public static Customer create(Customer customer) {
+        return DB_REPOSITORY.create(customer);
+    }
+
+    public static Optional<Customer> read(String customerNumber) {
+        return DB_REPOSITORY.read(customerNumber);
+    }
+
+    public static Customer update(Customer customer) {
+        return DB_REPOSITORY.update(customer);
+    }
+
+    public static boolean delete(String customerNumber) {
+        return DB_REPOSITORY.delete(customerNumber);
+    }
+
+    public static List<Customer> listAll() {
+        return DB_REPOSITORY.list();
     }
 }
