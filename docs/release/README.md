@@ -22,6 +22,7 @@ Developer: Franck Merlin
 - In-memory database implementation for development (`InMemoryDatabaseGateway`).
 - Repository CRUD classes for customer/account/transaction records.
 - Static CRUD bridge points for customer, account, and transaction business models.
+- Swing desktop starter client (`FortisBankDesktopApp`) integrated with existing business service.
 
 ## Migration Path to Part III
 1. Introduce repository interfaces in `business` layer.

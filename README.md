@@ -29,6 +29,7 @@ The goal is to deliver a functional Java console MVP with layered architecture.
 ## Run and Build
 - Compile (Maven): `mvn -DskipTests compile`
 - Run app: `mvn -DskipTests exec:java -Dexec.mainClass=com.fortis.bank.FortisBank`
+- Run desktop starter: `mvn -DskipTests exec:java -Dexec.mainClass=com.fortis.bank.presentation.FortisBankDesktopApp`
 - Fallback compile (without Maven, PowerShell): `javac -d out (Get-ChildItem -Recurse src/main/java -Filter *.java | ForEach-Object { $_.FullName })`
 
 ## Data Output
