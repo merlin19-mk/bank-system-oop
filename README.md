@@ -49,8 +49,8 @@ The goal is to deliver a functional Java console MVP with layered architecture.
 
 ## Part III Starter (Current)
 - `DatabaseGateway` abstraction and `InMemoryDatabaseGateway` implementation.
-- `CustomerDbRepository` with CRUD operations.
-- Static public customer CRUD bridge methods (`create/read/update/delete/listAll`) in business class.
+- Repository CRUD implementations for customers, accounts, and transactions.
+- Static public CRUD bridge methods for customer plus account/transaction bridge utilities.
 
 ## Documentation Map
 - [Analysis](docs/analysis/README.md)

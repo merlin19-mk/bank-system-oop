@@ -20,8 +20,8 @@ Developer: Franck Merlin
 ## Delivered Part III Starter
 - Database abstraction introduced (`DatabaseGateway`).
 - In-memory database implementation for development (`InMemoryDatabaseGateway`).
-- Customer repository CRUD class (`CustomerDbRepository`).
-- Static customer CRUD bridge methods added in `Customer` class.
+- Repository CRUD classes for customer/account/transaction records.
+- Static CRUD bridge points for customer, account, and transaction business models.
 
 ## Migration Path to Part III
 1. Introduce repository interfaces in `business` layer.
