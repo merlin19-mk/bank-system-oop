@@ -1,7 +1,7 @@
 # Fortis Bank System - Console Application
 
 Developer: Franck Merlin  
-Version: v0.3.0  
+Version: v1.0.0 (MVP)  
 Delivery Window: 2026-04-01 to 2026-04-21
 
 ## Project Scope
@@ -41,6 +41,11 @@ The goal is to deliver a functional Java console MVP with layered architecture.
 - `notifications.log`
 - `audit.log`
 - Monthly statements are generated under `data/statements/`.
+
+## Release State
+- MVP status: complete for Part II (console + file persistence).
+- Deferred to future phase: Part III database layer and graphical client.
+- Release notes: [MVP Release Notes](docs/release/README.md)
 
 ## Documentation Map
 - [Analysis](docs/analysis/README.md)
