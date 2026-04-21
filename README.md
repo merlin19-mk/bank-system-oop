@@ -43,8 +43,14 @@ The goal is to deliver a functional Java console MVP with layered architecture.
 
 ## Release State
 - MVP status: complete for Part II (console + file persistence).
-- Deferred to future phase: Part III database layer and graphical client.
+- Part III starter delivered: database abstraction and customer CRUD bridge.
+- Deferred to future phase: full database integration and graphical client.
 - Release notes: [MVP Release Notes](docs/release/README.md)
+
+## Part III Starter (Current)
+- `DatabaseGateway` abstraction and `InMemoryDatabaseGateway` implementation.
+- `CustomerDbRepository` with CRUD operations.
+- Static public customer CRUD bridge methods (`create/read/update/delete/listAll`) in business class.
 
 ## Documentation Map
 - [Analysis](docs/analysis/README.md)

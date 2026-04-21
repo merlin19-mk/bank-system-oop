@@ -17,6 +17,12 @@ Developer: Franck Merlin
 - Public static CRUD bridges in business classes targeting database layer.
 - GUI client replacing or complementing console presentation.
 
+## Delivered Part III Starter
+- Database abstraction introduced (`DatabaseGateway`).
+- In-memory database implementation for development (`InMemoryDatabaseGateway`).
+- Customer repository CRUD class (`CustomerDbRepository`).
+- Static customer CRUD bridge methods added in `Customer` class.
+
 ## Migration Path to Part III
 1. Introduce repository interfaces in `business` layer.
 2. Keep `FileDataStore` as one implementation and add DB implementations.
