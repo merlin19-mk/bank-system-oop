@@ -4,7 +4,7 @@ Developer: Franck Merlin
 Version: v1.0.0 (MVP)  
 
 ## Project Scope
-This repository contains a solo implementation for the Fortis Bank case study.
+This repository contains a solo 21-day development timeline for the Fortis Bank case study.
 The goal is to deliver a functional Java console MVP with layered architecture.
 
 ## MVP Boundary

@@ -17,7 +17,7 @@
 - Provide reportability and monthly statements in MVP form.
 
 ## Assumptions for MVP
-- Single-user console workflow.
+- Single-user console operation.
 - File-based persistence.
 - Own-account transfers by default.
 - Soft-close lifecycle for customers and accounts.
