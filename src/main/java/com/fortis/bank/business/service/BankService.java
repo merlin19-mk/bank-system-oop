@@ -21,10 +21,12 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -44,6 +46,7 @@ public class BankService {
 
     public BankService(FileDataStore fileDataStore) {
         this.fileDataStore = fileDataStore;
+        loadSnapshot();
     }
 
     public Customer createCustomer(String firstName, String lastName, String pin, String email, String phone) {
@@ -67,6 +70,7 @@ public class BankService {
     }
 
     public List<Account> listCustomerAccounts(String customerNumber) {
+        getCustomer(customerNumber);
         return accounts.values().stream()
                 .filter(a -> a.getCustomerNumber().equals(customerNumber))
                 .sorted(Comparator.comparing(Account::getAccountNumber))
@@ -166,7 +170,7 @@ public class BankService {
         long activeCustomers = customers.values().stream().filter(c -> c.getStatus() == CustomerStatus.ACTIVE).count();
         long closedCustomers = customers.size() - activeCustomers;
         int accountCount = accounts.size();
-        long transactionCount = accountTransactions.values().stream().mapToLong(List::size).sum();
+        long transactionCount = collectUniqueTransactions().size();
 
         return "Manager Report\n"
                 + "- Customers total: " + customers.size() + "\n"
@@ -208,19 +212,167 @@ public class BankService {
         fileDataStore.saveSnapshot(
                 customers.values(),
                 accounts.values(),
-                accountTransactions.values().stream().flatMap(Collection::stream).collect(Collectors.toList()),
+                collectUniqueTransactions(),
                 notifications,
                 pendingRequests.values());
     }
 
     private Account createAccountByType(String accountNumber, String customerNumber, AccountType accountType) {
+        return createAccountByType(accountNumber, customerNumber, accountType, null, null, null);
+    }
+
+    private Account createAccountByType(
+            String accountNumber,
+            String customerNumber,
+            AccountType accountType,
+            com.fortis.bank.business.account.AccountStatus status,
+            BigDecimal initialBalance,
+            String currencyCode) {
+        BigDecimal balance = initialBalance == null ? BigDecimal.ZERO : initialBalance;
         return switch (accountType) {
-            case SAVINGS -> new SavingsAccount(accountNumber, customerNumber);
-            case CREDIT -> new CreditAccount(accountNumber, customerNumber);
-            case CURRENCY -> new CurrencyAccount(accountNumber, customerNumber, "USD");
-            case LINE_OF_CREDIT -> new LineOfCreditAccount(accountNumber, customerNumber);
-            case CHECKING -> new CheckingAccount(accountNumber, customerNumber);
+            case SAVINGS -> status == null
+                    ? new SavingsAccount(accountNumber, customerNumber)
+                    : new SavingsAccount(accountNumber, customerNumber, status, balance);
+            case CREDIT -> status == null
+                    ? new CreditAccount(accountNumber, customerNumber)
+                    : new CreditAccount(accountNumber, customerNumber, status, balance);
+            case CURRENCY -> {
+                String effectiveCurrency = (currencyCode == null || currencyCode.isBlank()) ? "USD" : currencyCode;
+                yield status == null
+                        ? new CurrencyAccount(accountNumber, customerNumber, effectiveCurrency)
+                        : new CurrencyAccount(accountNumber, customerNumber, effectiveCurrency, status, balance);
+            }
+            case LINE_OF_CREDIT -> status == null
+                    ? new LineOfCreditAccount(accountNumber, customerNumber)
+                    : new LineOfCreditAccount(accountNumber, customerNumber, status, balance);
+            case CHECKING -> status == null
+                    ? new CheckingAccount(accountNumber, customerNumber)
+                    : new CheckingAccount(accountNumber, customerNumber, status, balance);
         };
+    }
+
+    private List<Transaction> collectUniqueTransactions() {
+        Map<String, Transaction> uniqueTransactions = new LinkedHashMap<>();
+        for (List<Transaction> txList : accountTransactions.values()) {
+            for (Transaction transaction : txList) {
+                uniqueTransactions.putIfAbsent(transaction.getTransactionId(), transaction);
+            }
+        }
+        return new ArrayList<>(uniqueTransactions.values());
+    }
+
+    private void loadSnapshot() {
+        FileDataStore.Snapshot snapshot = fileDataStore.loadSnapshot();
+
+        for (FileDataStore.StoredCustomer stored : snapshot.customers()) {
+            Customer customer = new Customer(
+                    stored.customerNumber(),
+                    stored.firstName(),
+                    stored.lastName(),
+                    stored.pin(),
+                    stored.email(),
+                    stored.phone(),
+                    stored.status());
+            customers.put(customer.getCustomerNumber(), customer);
+        }
+
+        for (FileDataStore.StoredAccount stored : snapshot.accounts()) {
+            if (!customers.containsKey(stored.customerNumber())) {
+                continue;
+            }
+            Account account = createAccountByType(
+                    stored.accountNumber(),
+                    stored.customerNumber(),
+                    stored.accountType(),
+                    stored.status(),
+                    stored.balance(),
+                    stored.currencyCode());
+            accounts.put(account.getAccountNumber(), account);
+            accountTransactions.put(account.getAccountNumber(), new ArrayList<>());
+        }
+
+        Set<String> loadedTransactionIds = new HashSet<>();
+        for (FileDataStore.StoredTransaction stored : snapshot.transactions()) {
+            if (!loadedTransactionIds.add(stored.transactionId())) {
+                continue;
+            }
+
+            String sourceAccount = stored.sourceAccount();
+            String targetAccount = stored.targetAccount() == null ? sourceAccount : stored.targetAccount();
+            if (!accounts.containsKey(sourceAccount)) {
+                continue;
+            }
+
+            Transaction transaction = new Transaction(
+                    stored.transactionId(),
+                    sourceAccount,
+                    targetAccount,
+                    stored.type(),
+                    stored.amount(),
+                    stored.createdAt(),
+                    stored.note());
+
+            accountTransactions.computeIfAbsent(sourceAccount, ignored -> new ArrayList<>()).add(transaction);
+            if (!sourceAccount.equals(targetAccount) && accounts.containsKey(targetAccount)) {
+                accountTransactions.computeIfAbsent(targetAccount, ignored -> new ArrayList<>()).add(transaction);
+            }
+        }
+
+        notifications.addAll(snapshot.notifications());
+
+        for (FileDataStore.StoredRequest stored : snapshot.pendingRequests()) {
+            if (!customers.containsKey(stored.customerNumber())) {
+                continue;
+            }
+            AccountRequest request = new AccountRequest(
+                    stored.requestId(),
+                    stored.customerNumber(),
+                    stored.requestedType(),
+                    stored.createdAt());
+            pendingRequests.put(request.getRequestId(), request);
+        }
+
+        seedIdGeneratorFromLoadedData();
+    }
+
+    private void seedIdGeneratorFromLoadedData() {
+        int maxCustomerSequence = customers.keySet().stream()
+                .mapToInt(this::extractTrailingNumber)
+                .max()
+                .orElse(0);
+        int maxAccountSequence = accounts.keySet().stream()
+                .mapToInt(this::extractTrailingNumber)
+                .max()
+                .orElse(0);
+        int maxTransactionSequence = collectUniqueTransactions().stream()
+                .map(Transaction::getTransactionId)
+                .mapToInt(this::extractTrailingNumber)
+                .max()
+                .orElse(0);
+        int maxRequestSequence = pendingRequests.keySet().stream()
+                .mapToInt(this::extractTrailingNumber)
+                .max()
+                .orElse(0);
+
+        IdGenerator.seedCustomerSequence(maxCustomerSequence);
+        IdGenerator.seedAccountSequence(maxAccountSequence);
+        IdGenerator.seedTransactionSequence(maxTransactionSequence);
+        IdGenerator.seedRequestSequence(maxRequestSequence);
+    }
+
+    private int extractTrailingNumber(String text) {
+        if (text == null || text.isBlank()) {
+            return 0;
+        }
+        int index = text.length() - 1;
+        while (index >= 0 && Character.isDigit(text.charAt(index))) {
+            index--;
+        }
+        String numeric = text.substring(index + 1);
+        if (numeric.isEmpty()) {
+            return 0;
+        }
+        return Integer.parseInt(numeric);
     }
 
     private void applyCheckingFeeIfNeeded(Account account) {

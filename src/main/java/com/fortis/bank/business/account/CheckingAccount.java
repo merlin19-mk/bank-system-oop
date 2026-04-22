@@ -21,6 +21,14 @@ public class CheckingAccount extends Account {
         super(accountNumber, customerNumber, AccountType.CHECKING);
     }
 
+    public CheckingAccount(
+            String accountNumber,
+            String customerNumber,
+            AccountStatus status,
+            BigDecimal initialBalance) {
+        super(accountNumber, customerNumber, AccountType.CHECKING, status, initialBalance);
+    }
+
     public BigDecimal calculateFeeForTransaction(LocalDate date) {
         YearMonth key = YearMonth.from(date);
         int count = monthlyTransactionCounts.getOrDefault(key, 0) + 1;

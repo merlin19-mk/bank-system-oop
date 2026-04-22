@@ -16,10 +16,18 @@ public class AccountRequest {
     private final LocalDateTime createdAt;
 
     public AccountRequest(String requestId, String customerNumber, AccountType requestedType) {
+        this(requestId, customerNumber, requestedType, LocalDateTime.now());
+    }
+
+    public AccountRequest(
+            String requestId,
+            String customerNumber,
+            AccountType requestedType,
+            LocalDateTime createdAt) {
         this.requestId = requestId;
         this.customerNumber = customerNumber;
         this.requestedType = requestedType;
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = createdAt == null ? LocalDateTime.now() : createdAt;
     }
 
     public String getRequestId() {

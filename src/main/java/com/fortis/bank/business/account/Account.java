@@ -18,11 +18,20 @@ public abstract class Account {
     protected BigDecimal balance;
 
     protected Account(String accountNumber, String customerNumber, AccountType accountType) {
+        this(accountNumber, customerNumber, accountType, AccountStatus.ACTIVE, BigDecimal.ZERO);
+    }
+
+    protected Account(
+            String accountNumber,
+            String customerNumber,
+            AccountType accountType,
+            AccountStatus status,
+            BigDecimal initialBalance) {
         this.accountNumber = ValidationUtil.requireNonBlank(accountNumber, "accountNumber");
         this.customerNumber = ValidationUtil.requireNonBlank(customerNumber, "customerNumber");
         this.accountType = accountType;
-        this.status = AccountStatus.ACTIVE;
-        this.balance = BigDecimal.ZERO;
+        this.status = status == null ? AccountStatus.ACTIVE : status;
+        this.balance = initialBalance == null ? BigDecimal.ZERO : initialBalance;
     }
 
     public String getAccountNumber() {

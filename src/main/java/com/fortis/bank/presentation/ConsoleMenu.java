@@ -171,8 +171,7 @@ public class ConsoleMenu {
     }
 
     private void depositFlow() {
-        System.out.print("Account number: ");
-        String accountNumber = scanner.nextLine().trim();
+        String accountNumber = resolveAccountNumber("Account number (or customer number): ");
         System.out.print("Amount: ");
         BigDecimal amount = new BigDecimal(scanner.nextLine().trim());
         bankService.deposit(accountNumber, amount);
@@ -180,8 +179,7 @@ public class ConsoleMenu {
     }
 
     private void withdrawFlow() {
-        System.out.print("Account number: ");
-        String accountNumber = scanner.nextLine().trim();
+        String accountNumber = resolveAccountNumber("Account number (or customer number): ");
         System.out.print("Amount: ");
         BigDecimal amount = new BigDecimal(scanner.nextLine().trim());
         bankService.withdraw(accountNumber, amount);
@@ -200,14 +198,12 @@ public class ConsoleMenu {
     }
 
     private void balanceFlow() {
-        System.out.print("Account number: ");
-        String accountNumber = scanner.nextLine().trim();
+        String accountNumber = resolveAccountNumber("Account number (or customer number): ");
         System.out.println("Balance: " + bankService.getBalance(accountNumber));
     }
 
     private void historyFlow() {
-        System.out.print("Account number: ");
-        String accountNumber = scanner.nextLine().trim();
+        String accountNumber = resolveAccountNumber("Account number (or customer number): ");
         bankService.getTransactionHistory(accountNumber)
                 .forEach(tx -> System.out.println(tx.getTransactionId() + " | " + tx.getType() + " | "
                         + tx.getAmount() + " | " + tx.getCreatedAt() + " | " + tx.getNote()));
@@ -241,5 +237,33 @@ public class ConsoleMenu {
                 .map(a -> a.getAccountNumber() + "(" + a.getAccountType() + ")")
                 .reduce((left, right) -> left + ", " + right)
                 .orElse("[]");
+    }
+
+    private String resolveAccountNumber(String prompt) {
+        System.out.print(prompt);
+        String input = scanner.nextLine().trim();
+        if (input.contains("-ACC-")) {
+            return input;
+        }
+
+        List<Account> customerAccounts = bankService.listCustomerAccounts(input);
+        if (customerAccounts.isEmpty()) {
+            throw new IllegalArgumentException("no accounts found for customer: " + input);
+        }
+        if (customerAccounts.size() == 1) {
+            return customerAccounts.get(0).getAccountNumber();
+        }
+
+        System.out.println("Select account:");
+        for (int i = 0; i < customerAccounts.size(); i++) {
+            Account account = customerAccounts.get(i);
+            System.out.println((i + 1) + ". " + account.getAccountNumber() + " (" + account.getAccountType() + ")");
+        }
+        System.out.print("Choice: ");
+        int selected = Integer.parseInt(scanner.nextLine().trim());
+        if (selected < 1 || selected > customerAccounts.size()) {
+            throw new IllegalArgumentException("invalid account choice");
+        }
+        return customerAccounts.get(selected - 1).getAccountNumber();
     }
 }

@@ -27,13 +27,24 @@ public class Transaction {
             TransactionType type,
             BigDecimal amount,
             String note) {
+        this(transactionId, sourceAccount, targetAccount, type, amount, LocalDateTime.now(), note);
+    }
+
+    public Transaction(
+            String transactionId,
+            String sourceAccount,
+            String targetAccount,
+            TransactionType type,
+            BigDecimal amount,
+            LocalDateTime createdAt,
+            String note) {
         this.transactionId = ValidationUtil.requireNonBlank(transactionId, "transactionId");
         this.sourceAccount = sourceAccount;
         this.targetAccount = targetAccount;
         this.type = type;
         this.amount = amount;
         this.note = note == null ? "" : note;
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = createdAt == null ? LocalDateTime.now() : createdAt;
     }
 
     public String getTransactionId() {

@@ -68,7 +68,11 @@ public final class FortisBankDesktopApp {
                         pinField.getText(),
                         emailField.getText(),
                         phoneField.getText());
+                String checkingAccount = bankService.listCustomerAccounts(customer.getCustomerNumber())
+                        .get(0)
+                        .getAccountNumber();
                 outputArea.append("Created customer " + customer.getCustomerNumber() + "\n");
+                outputArea.append("Checking account: " + checkingAccount + "\n");
                 outputArea.append(bankService.generateManagerReport() + "\n\n");
                 bankService.saveSnapshot();
             } catch (RuntimeException ex) {

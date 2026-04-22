@@ -18,6 +18,15 @@ public class SavingsAccount extends Account {
         this.annualInterestRate = Constants.SAVINGS_ANNUAL_INTEREST_RATE;
     }
 
+    public SavingsAccount(
+            String accountNumber,
+            String customerNumber,
+            AccountStatus status,
+            BigDecimal initialBalance) {
+        super(accountNumber, customerNumber, AccountType.SAVINGS, status, initialBalance);
+        this.annualInterestRate = Constants.SAVINGS_ANNUAL_INTEREST_RATE;
+    }
+
     public BigDecimal applyAnnualGain() {
         BigDecimal gain = balance.multiply(annualInterestRate);
         balance = balance.add(gain);

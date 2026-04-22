@@ -32,13 +32,24 @@ public class Customer {
             String pin,
             String email,
             String phone) {
+        this(customerNumber, firstName, lastName, pin, email, phone, CustomerStatus.ACTIVE);
+    }
+
+    public Customer(
+            String customerNumber,
+            String firstName,
+            String lastName,
+            String pin,
+            String email,
+            String phone,
+            CustomerStatus status) {
         this.customerNumber = ValidationUtil.requireNonBlank(customerNumber, "customerNumber");
         this.firstName = ValidationUtil.requireNonBlank(firstName, "firstName");
         this.lastName = ValidationUtil.requireNonBlank(lastName, "lastName");
         this.pin = ValidationUtil.validatePin(pin);
         this.email = ValidationUtil.validateEmail(email);
         this.phone = ValidationUtil.validatePhone(phone);
-        this.status = CustomerStatus.ACTIVE;
+        this.status = status == null ? CustomerStatus.ACTIVE : status;
     }
 
     public String getCustomerNumber() {

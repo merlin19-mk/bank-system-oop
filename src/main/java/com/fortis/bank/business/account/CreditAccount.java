@@ -18,6 +18,15 @@ public class CreditAccount extends Account {
         this.creditLimit = Constants.CREDIT_DEFAULT_LIMIT;
     }
 
+    public CreditAccount(
+            String accountNumber,
+            String customerNumber,
+            AccountStatus status,
+            BigDecimal initialBalance) {
+        super(accountNumber, customerNumber, AccountType.CREDIT, status, initialBalance);
+        this.creditLimit = Constants.CREDIT_DEFAULT_LIMIT;
+    }
+
     @Override
     protected boolean canWithdraw(BigDecimal amount) {
         return balance.subtract(amount).compareTo(creditLimit.negate()) >= 0;

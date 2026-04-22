@@ -18,6 +18,15 @@ public class LineOfCreditAccount extends Account {
         this.lineLimit = Constants.LINE_OF_CREDIT_DEFAULT_LIMIT;
     }
 
+    public LineOfCreditAccount(
+            String accountNumber,
+            String customerNumber,
+            AccountStatus status,
+            BigDecimal initialBalance) {
+        super(accountNumber, customerNumber, AccountType.LINE_OF_CREDIT, status, initialBalance);
+        this.lineLimit = Constants.LINE_OF_CREDIT_DEFAULT_LIMIT;
+    }
+
     @Override
     protected boolean canWithdraw(BigDecimal amount) {
         return balance.subtract(amount).compareTo(lineLimit.negate()) >= 0;

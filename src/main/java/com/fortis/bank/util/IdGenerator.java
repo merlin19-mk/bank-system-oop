@@ -38,4 +38,24 @@ public final class IdGenerator {
         int value = REQUEST_SEQUENCE.incrementAndGet();
         return String.format("REQ-%05d", value);
     }
+
+    public static void seedCustomerSequence(int currentMax) {
+        setIfHigher(CUSTOMER_SEQUENCE, currentMax);
+    }
+
+    public static void seedAccountSequence(int currentMax) {
+        setIfHigher(ACCOUNT_SEQUENCE, currentMax);
+    }
+
+    public static void seedTransactionSequence(int currentMax) {
+        setIfHigher(TRANSACTION_SEQUENCE, currentMax);
+    }
+
+    public static void seedRequestSequence(int currentMax) {
+        setIfHigher(REQUEST_SEQUENCE, currentMax);
+    }
+
+    private static void setIfHigher(AtomicInteger sequence, int currentMax) {
+        sequence.updateAndGet(existing -> Math.max(existing, currentMax));
+    }
 }
